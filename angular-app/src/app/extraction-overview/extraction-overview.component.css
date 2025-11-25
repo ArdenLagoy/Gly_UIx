@@ -1,0 +1,36 @@
+canvas {
+  transition: all 0.2s ease-in-out;
+}
+
+input:focus {
+  outline: none;
+}
+
+.connector-line {
+  stroke-dasharray: 6 6;
+  opacity: 0.35;
+}
+
+.magnifier {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+}
+
+/* Smooth cursor change when hovering highlights */
+canvas {
+  transition: cursor 0.1s ease-in-out;
+}
+
+/* Optional: subtle fade-in animation for magnifier panel */
+.magnifier-enter {
+  opacity: 0;
+  transform: scale(0.95);
+  animation: fadeInZoom 0.25s ease forwards;
+}
+
+@keyframes fadeInZoom {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

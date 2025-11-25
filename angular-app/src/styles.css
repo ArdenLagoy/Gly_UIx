@@ -1,0 +1,19 @@
+.view { display: none; }
+.view.active { display: block; }
+/* small utilities used by the template */
+body { -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }/* Global styles */
+body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+
+/* Make export menu opaque (applies to mat-menu overlays with panelClass="export-menu-panel") */
+.export-menu-panel.mat-menu-panel {
+	background-color: #ffffff !important;
+	color: rgba(0,0,0,0.87) !important;
+	box-shadow: 0 8px 24px rgba(15,23,42,0.12) !important;
+}
+
+/* Ensure menu items have solid background and readable color */
+.export-menu-panel.mat-menu-panel .mat-menu-item {
+	background: transparent !important;
+	color: inherit !important;
+}
+
