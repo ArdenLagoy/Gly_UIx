@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 .view { display: none; }
 .view.active { display: block; }
 /* small utilities used by the template */
