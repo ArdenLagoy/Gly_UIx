@@ -48,6 +48,8 @@ export class ExtractionOverviewComponent implements AfterViewInit {
   baseScale = 1;
   zoomLevel = 1.5;
   readonly baseWidth = 480;
+  currentPage = 1;
+  totalPages = 1;
 
   // Multi-page support (lazy)
   pageViewports: any[] = [];
@@ -179,6 +181,8 @@ export class ExtractionOverviewComponent implements AfterViewInit {
     this.pdfDoc = await loadingTask.promise;
 
     const numPages = this.pdfDoc.numPages || 1;
+    this.totalPages = numPages;
+    this.currentPage = 1;
 
     // compute base scale using page 1
     const firstPage = await this.pdfDoc.getPage(1);
@@ -989,5 +993,35 @@ redrawConnector() {
     this.showMagnifier = false;
     this.magnifierCoords = null;
     this.clearHighlight();
+  }
+
+  // ===========================================
+  // PAGE NAVIGATION
+  // ===========================================
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.scrollToPage(this.currentPage);
+    }
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.scrollToPage(this.currentPage);
+    }
+  }
+
+  scrollToPage(pageNum: number) {
+    if (!this.pdfScroll?.nativeElement || pageNum < 1 || pageNum > this.totalPages) return;
+    
+    const scroller = this.pdfScroll.nativeElement;
+    const pageOffset = this.pageOffsets[pageNum - 1] || 0;
+    const targetScrollTop = pageOffset * this.zoomLevel;
+    
+    scroller.scrollTo({
+      top: targetScrollTop,
+      behavior: 'smooth'
+    });
   }
 }

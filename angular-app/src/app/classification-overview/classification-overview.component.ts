@@ -65,11 +65,20 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs
 
           <!-- 🖼 PDF Viewer with Zoom -->
           <div class="flex-1 relative rounded-xl border border-slate-200 bg-slate-50 flex flex-col overflow-hidden">
-            <!-- Zoom Controls -->
-            <div class="flex justify-end gap-2 p-2 bg-slate-100 border-b border-slate-200 rounded-t-xl">
-              <button (click)="zoomOut()" class="px-3 py-1 rounded-md border border-slate-300 bg-white hover:bg-slate-200 text-sm">−</button>
-              <span class="text-sm font-medium text-slate-600 w-14 text-center">{{ (zoomLevel * 100) | number:'1.0-0' }}%</span>
-              <button (click)="zoomIn()" class="px-3 py-1 rounded-md border border-slate-300 bg-white hover:bg-slate-200 text-sm">+</button>
+            <!-- Navigation and Zoom Controls -->
+            <div class="flex justify-between items-center gap-2 p-2 bg-slate-100 border-b border-slate-200 rounded-t-xl">
+              <!-- Page Navigation -->
+              <div class="flex items-center gap-2">
+                <button (click)="previousPage()" [disabled]="currentPage <= 1" class="px-3 py-1 rounded-md border border-slate-300 bg-white hover:bg-slate-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed">←</button>
+                <span class="text-sm font-medium text-slate-600 min-w-[80px] text-center">Page {{ currentPage }} / {{ totalPages }}</span>
+                <button (click)="nextPage()" [disabled]="currentPage >= totalPages" class="px-3 py-1 rounded-md border border-slate-300 bg-white hover:bg-slate-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed">→</button>
+              </div>
+              <!-- Zoom Controls -->
+              <div class="flex items-center gap-2">
+                <button (click)="zoomOut()" class="px-3 py-1 rounded-md border border-slate-300 bg-white hover:bg-slate-200 text-sm">−</button>
+                <span class="text-sm font-medium text-slate-600 w-14 text-center">{{ (zoomLevel * 100) | number:'1.0-0' }}%</span>
+                <button (click)="zoomIn()" class="px-3 py-1 rounded-md border border-slate-300 bg-white hover:bg-slate-200 text-sm">+</button>
+              </div>
             </div>
 
             <div #pdfScroll class="relative flex justify-center items-start p-2 overflow-auto flex-1 bg-slate-50">
@@ -111,6 +120,8 @@ export class ClassificationOverviewComponent implements AfterViewInit {
   pdfDoc: any;
   currentIndex = 0;
   noDocsToValidate = false;
+  currentPage = 1;
+  totalPages = 1;
 
   documents = [
     {
@@ -166,14 +177,17 @@ export class ClassificationOverviewComponent implements AfterViewInit {
   async loadPdf(url: string) {
     const loadingTask = pdfjsLib.getDocument(url);
     this.pdfDoc = await loadingTask.promise;
+    this.totalPages = this.pdfDoc.numPages || 1;
+    this.currentPage = 1;
     const page = await this.pdfDoc.getPage(1);
     const unscaledViewport = page.getViewport({ scale: 1 });
     this.baseScale = this.baseWidth / unscaledViewport.width;
     await this.renderPage();
   }
 
-  async renderPage() {
-    const page = await this.pdfDoc.getPage(1);
+  async renderPage(pageNum: number = 1) {
+    if (!this.pdfDoc) return;
+    const page = await this.pdfDoc.getPage(pageNum);
     const viewport = page.getViewport({ scale: this.baseScale });
     const canvas = this.pdfCanvas.nativeElement;
     const ctx = canvas.getContext('2d')!;
@@ -186,6 +200,20 @@ export class ClassificationOverviewComponent implements AfterViewInit {
 
     await page.render({ canvasContext: ctx, viewport }).promise;
     this.applyZoomTransform();
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.renderPage(this.currentPage);
+    }
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.renderPage(this.currentPage);
+    }
   }
 
   applyZoomTransform() {
